@@ -71,54 +71,63 @@ namespace winform_app
             }
             catch (Exception ex)
             {
+                
                 pbxPokemon.Load("https://efectocolibri.com/wp-content/uploads/2021/01/placeholder.png"); //carga la imagen  que guardé arriba en el pictureBox para que se muestr por pantalla.
             }                                   //Pero si la dejo acá, se compllica con la actualizacion de la db, ya que no se enterará y me romperá todo. Para esto haremos un nuevo metodo privado.
         }
 
-        private void btnAgregar_Click(object sender, EventArgs e) //Este formulario se llama desde el listado gral de Pokemons al presionar "agregar".
+        private void btnAgregar_Click(object sender, EventArgs e) //Este formulario se llama desde el listado gral de Pokemons al presionar "agregar". 
+                                                                  //Aquí llamo al constructor vacío. (frmAltaPokemons.cs)
         {
             frmAltaPokemon alta = new frmAltaPokemon(); //Es el nombre del nuevo formulario creado en la sección "winform-app" del explorador de soluciones. Necesito crearlo para que me lo levante.
             alta.ShowDialog(); //funciones predefinidas de WinForm -> Impide que salga de la ventana hasta que la llene (hace ruidito de windows). si uso sólo ".Show()" me permite salir de esa ventana y dejarla de segunodo plano. || Hay una opción al ShowDialog() q veremos más adelante.
             cargar(); //funciones predefinidas de WinForm.
         }
 
-        private void btnModificar_Click(object sender, EventArgs e)
+        private void btnModificar_Click(object sender, EventArgs e) //Para que tenga sentido la modificación de un PKM, tengo que obtener todos sus datos mendiante una
+                                                                                                        //selección del PKM y poder modificar lo que quiero mientras lo otro queda tal cuál.
+                                                                                                        //Aquí llamo al constructor con un parámetro (frmAltaPokemons.cs)
         {
-            Pokemon seleccionado;
-            seleccionado = (Pokemon)dgvPokemons.CurrentRow.DataBoundItem;
+            Pokemon seleccionado; // *= creo la var del tipo Pokemon, llamada seleccionado. 
+            seleccionado = (Pokemon)dgvPokemons.CurrentRow.DataBoundItem; // *=  luego uso casteo explicito (Pokemon)--.--.DBI =  con esto tengo al pokemon seleccionado.
 
-            frmAltaPokemon modificar = new frmAltaPokemon(seleccionado);
-            modificar.ShowDialog();
-            cargar();
+            frmAltaPokemon modificar = new frmAltaPokemon(seleccionado); //crea el formulario. PERO le tenemos que pasar por parámetro al constructo de la clase frmAltaPokemon que quiero modificar (es una ventana pero no deja de ser una clase). 
+                                                                                                                          //¿Cómo = *?
+                                                                                                                         //Al llamar al constructor así frmAP(), está vacío, llama al InitialiceComponent() -lo vemos en línea 18-. Sólo q al pasarle la var seleccionado hará lo que esta incluya.
+                                                                                                                         //ir a frmAltaPokemon.cs línea 26. 
+
+            modificar.ShowDialog(); //muestra el formulario.
+            cargar(); //carga el formulario.
         }
 
-        private void btnEliminarFisico_Click(object sender, EventArgs e)
+        private void btnEliminarFisico_Click(object sender, EventArgs e) //Una de las formas de eliminar datos. La func eliminar estará en la clase PokemonNegocio.línea 226.
         {
-            eliminar();
+            eliminar(); //¿Es Eliminación Lógica la que querés? False, está por defecto en la función eliminar().
         }
 
         private void btnEliminarLogico_Click(object sender, EventArgs e)
         {
-            eliminar(true);
+            eliminar(true); //este está asociado a la linea 113. ¿Es Eliminación lógica lo q querés? --> true.
         }
 
-        private void eliminar(bool logico = false)
-        {
-            PokemonNegocio negocio = new PokemonNegocio();
-            Pokemon seleccionado;
+        private void eliminar(bool logico = false) //Se pone false por básico para esperar la confirmación a la hora de espara el botón que lleva el true y lo sobreescribe.
+        {                                                               //Para finalizar hay q ir a pokemonNegocio.cs al método filtrar (si no no los saca de la lista de la app) líena 41. Agragar al select la columna "Activo".
+            PokemonNegocio negocio = new PokemonNegocio();//creo una nueva instancia.
+            Pokemon seleccionado; //para determinar a quién le aplico la acción llamo al seleccionado de la fila.
             try
             {
                 DialogResult respuesta = MessageBox.Show("¿De verdad querés eliminarlo?", "Eliminando", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                if (respuesta == DialogResult.Yes)
+                //Tiramos el MessageBox para ptegnuntarnos si estamso sguros. 1er param: pregunta,, 2param: título de vtana. 3er param (agrego botones). Esto retornará un valor que puedo capturar:
+                if (respuesta == DialogResult.Yes) //toma el YES del Botton predefinido de Winform y us función.
                 {
-                    seleccionado = (Pokemon)dgvPokemons.CurrentRow.DataBoundItem;
+                    seleccionado = (Pokemon)dgvPokemons.CurrentRow.DataBoundItem; //materializo la selección de la grilla.
 
                     if (logico)
-                        negocio.eliminarLogico(seleccionado.Id);
+                        negocio.eliminarLogico(seleccionado.Id); //paso Id.
                     else
-                        negocio.eliminar(seleccionado.Id);
+                        negocio.eliminar(seleccionado.Id); //paso Id.
                     
-                    cargar();
+                    cargar(); //ejecuto para que se actualice.
                 }
             }
             catch (Exception ex)

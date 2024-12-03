@@ -42,6 +42,7 @@ namespace negocio
                 //Luego, tengo q pasarle un texto, q será la consulta SQL. Recomiendo escribirla primero en el sql server y luego copiarla al VS comm.
                 //E.Descripcion as Tipo = a poner un espacio, o sea, saco "as" y dejo un espacio entre una col y otra pero sin poner ",".
                 //puedo copiar "Select..." y probarlo en MSQL como consulta para corroborar q funcione.
+                //Al final agrego la columna P.Activo = 1. ASí no me agrega los q borré con Eliminación Lógica.
 
                 comando.Connection = conexion; //realizo la conexión.
 
@@ -115,10 +116,11 @@ namespace negocio
 
         public void modificar(Pokemon poke)
         {
-            AccesoDatos datos = new AccesoDatos();
+            AccesoDatos datos = new AccesoDatos(); //necesito el objeto acceso a datos, podría ser privado.
             try
             {
                 datos.setearConsulta("update POKEMONS set Numero = @numero, Nombre = @nombre, Descripcion = @desc, UrlImagen = @img, IdTipo = @idTipo, IdDebilidad = @idDebilidad Where Id = @id");
+                //La consulta es un upgrade y quiero actualizar casi todo. Uso UPDATE, método SQL.
                 datos.setearParametro("@numero", poke.Numero);
                 datos.setearParametro("@nombre", poke.Nombre);
                 datos.setearParametro("@desc", poke.Descripcion);
@@ -222,14 +224,15 @@ namespace negocio
             }
         }
 
-        public void eliminar(int id)
+        public void eliminar(int id) //tomará un id por parámetro que será el de pkm seleccionado. Es tipo función void pq no devuelve nada.
         {
             try
             {
-                AccesoDatos datos = new AccesoDatos();
-                datos.setearConsulta("delete from pokemons where id = @id");
-                datos.setearParametro("@id",id);
-                datos.ejecutarAccion();
+                AccesoDatos datos = new AccesoDatos(); //creo una instancia del Objeto AccesoDatos llamada datos.
+                datos.setearConsulta("delete from pokemons where id = @id"); // llamo método propio setearConsulta y paso la consulta SQL.
+                datos.setearParametro("@id",id); //llamo método setearParametro y lo cito.
+                datos.ejecutarAccion();  //llamo método ejecutarAccion para que active, o sea, borrar contra la db.
+                //Ahora hay q ir a frmPokemon.cs y llamar a este método.
 
             }
             catch (Exception ex)
@@ -238,12 +241,13 @@ namespace negocio
             }
         }
 
-        public void eliminarLogico(int id)
+        public void eliminarLogico(int id) //tomará un id por parámetro que será el de pkm seleccionado. Es tipo función void pq no devuelve nada
         {
             try
             {
                 AccesoDatos datos = new AccesoDatos();
-                datos.setearConsulta("update POKEMONS set Activo = 0 Where id = @id");
+                datos.setearConsulta("update POKEMONS set Activo = 0 Where id = @id"); //Fijarse que aquí entra la columna activo.
+                                                                                                        //UPDATE, me permite cambiar el valor junto con SET.
                 datos.setearParametro("@id", id);
                 datos.ejecutarAccion();
             }
