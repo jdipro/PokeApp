@@ -141,40 +141,45 @@ namespace negocio
             }
         }
 
-        public List<Pokemon> filtrar(string campo, string criterio, string filtro)
+        public List<Pokemon> filtrar(string campo, string criterio, string filtro) //Originalmente lo devolvió desde frmPokemons.cs como un Object.
+                                                                                   //Borro y pongo List <Pokemon>.
         {
-            List<Pokemon> lista = new List<Pokemon>();
+            List<Pokemon> lista = new List<Pokemon>(); //Esto va a ser muy parecido al Listar(), practicamente igual.
             AccesoDatos datos = new AccesoDatos();
-            try
+
+            try //Como toda conexión hago el try catch.
             {
                 string consulta = "Select Numero, Nombre, P.Descripcion, UrlImagen, E.Descripcion Tipo, D.Descripcion Debilidad, P.IdTipo, P.IdDebilidad, P.Id From POKEMONS P, ELEMENTOS E, ELEMENTOS D Where E.Id = P.IdTipo And D.Id = P.IdDebilidad And P.Activo = 1 And ";
-                if(campo == "Número")
+                //Tengo que poner una consulta que debe ser exactamente la misma que usamos en listar(). PERO fijarse que al final le dejo  un /espacio/ antes de cerrar comillla.
+                //Esto es así pq de esa manera le puedo sumar posibles filtros -> And y /espacio/ 
+                
+                if(campo == "Número") //Si busco por número y
                 {
-                    switch (criterio)
+                    switch (criterio)  //criterio sería el campo de búsqueda que es  lo que yo pongo a buscar.
                     {
-                        case "Mayor a":
-                            consulta += "Numero > " + filtro;
+                        case "Mayor a": // con el criterio mayor a
+                            consulta += "Numero > " + filtro; //agrego esto. 
                             break;
-                        case "Menor a":
-                            consulta += "Numero < " + filtro;
+                        case "Menor a": //si el criterio es menor a
+                            consulta += "Numero < " + filtro; //agrego esto otro.
                             break;
                         default:
-                            consulta += "Numero = " + filtro;
-                            break;
+                            consulta += "Numero = " + filtro; //si no es uno u otro, por default será =
+                             break;
                     }
                 }
-                else if(campo == "Nombre")
+                else if(campo == "Nombre") //Si busco por string y
                 {
-                    switch (criterio)
+                    switch (criterio) //criterio sería el campo de búsqueda que es  lo que yo pongo a buscar.
                     {
                         case "Comienza con":
-                            consulta += "Nombre like '" + filtro + "%' ";
+                            consulta += "Nombre like '" + filtro + "%' "; //este comodín es la manera en que le indico a sql que quiero q busque los q pongo "Nombre like  ' "   + filtro + "%' ";
                             break;
                         case "Termina con":
-                            consulta += "Nombre like '%" + filtro + "'";
+                            consulta += "Nombre like '%" + filtro + "'"; //"Nombre like  '%"   + filtro + " ' " ; 
                             break;
                         default:
-                            consulta += "Nombre like '%" + filtro + "%'";
+                            consulta += "Nombre like '%" + filtro + "%'"; //"Nombre like  '%"   + filtro + "% ' " ; Contiene en algún lado, es default - comodín en ambos lados
                             break;
                     }
                 }
@@ -194,9 +199,9 @@ namespace negocio
                     }
                 }
 
-                datos.setearConsulta(consulta);
-                datos.ejecutarLectura();
-                while (datos.Lector.Read())
+                datos.setearConsulta(consulta); //le paso a datos la var consulta que armé arriba.
+                datos.ejecutarLectura(); //ejecutamos.
+                    while (datos.Lector.Read()) //COPIE el contenido de LECTOR y c/vez q aparezca lector lo cambio por datos.
                 {
                     Pokemon aux = new Pokemon();
                     aux.Id = (int)datos.Lector["Id"];

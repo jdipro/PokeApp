@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.IO;
+using System.IO; // Esto sirve para poder guardar la imagen que cargue el usuario desde un lugar "x" en la DB. línea 142.
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using dominio; //agrego el dominio para poder llamar a Pokemon y cre uno nuevo, aquí será poke
 using negocio; //agrego para cargar los combobox en el evento Load del formulario.
-using System.Configuration;
+using System.Configuration; //Esto lo habilito para poder usar la configuración de la App de App.config. Ver línea 148.
 
 namespace winform_app
 {
@@ -18,7 +18,9 @@ namespace winform_app
     {
         private Pokemon pokemon = null; //ponemos esto para que se pueda crear un obejto Pokemon (por lo tanto, se crea desde 0). Btn CREAR d la app.
                                                                 //no tenga parámetros. Si se modifica viene el pedido con parñametros (linea 27) como vimos en frmPokemons línea 92.
-        private OpenFileDialog archivo = null;
+        
+        private OpenFileDialog archivo = null; //Hacemos que arranque en nulo para así no cargar imágenes en la carpeta de imágenes que no hayan sido aceptadas
+                                                                    //por el usuario al pulsar el botón "crear". (Línea 136)
 
         public frmAltaPokemon() //este es el cosntructor para un objeto nuevo.
         {
@@ -67,7 +69,7 @@ namespace winform_app
                 }
 
                 //Guardo imagen si la levantó localmente:
-                if(archivo != null && !(txtUrlImagen.Text.ToUpper().Contains("HTTP")))
+                if(archivo != null && !(txtUrlImagen.Text.ToUpper().Contains("HTTP"))) //así me aseguro que no viene de internet. (Ver linea 22) /Poner HTTP en mayúscula pq sino, lo toma y lo graba!
                     File.Copy(archivo.FileName, ConfigurationManager.AppSettings["images-folder"] + archivo.SafeFileName);
 
                 Close(); //finaltente cierro la cventana cuendo termino de agregar.
@@ -131,15 +133,32 @@ namespace winform_app
 
         private void btnAgregarImagen_Click(object sender, EventArgs e)
         {
-            archivo = new OpenFileDialog();
-            archivo.Filter = "jpg|*.jpg;|png|*.png";
-            if(archivo.ShowDialog() == DialogResult.OK)
+            archivo = new OpenFileDialog(); //El objeto OFD(), es propio de .net. Creo una instancia de éste llamada archivo.
+            archivo.Filter = "jpg|*.jpg;|png|*.png"; // con Filter, le diremos que tipo de archivo va a permitir. va " jpg|* .jpg;" (todos los jpg) luego |png|*.png"; Hay q poner desde el 2do tipo entre |tipo|
+            if(archivo.ShowDialog() == DialogResult.OK) //SDialog sólo me abriría el explorador de windows. .Ok, significa que clickeé en uno y puse aceptar. Entonces:
             {
-                txtUrlImagen.Text = archivo.FileName;
-                cargarImagen(archivo.FileName);
+                txtUrlImagen.Text = archivo.FileName;  //Esto me va a guardar la ruta completa del archivo que esté seleccionando.
+                cargarImagen(archivo.FileName); //Además quiero verlo, así que llamo al método que ya tengo preparado para eso y le paso la ruta del archivo.
 
                 //guardo la imagen
-                //File.Copy(archivo.FileName, ConfigurationManager.AppSettings["images-folder"] + archivo.SafeFileName);
+
+                File.Copy(archivo.FileName, ConfigurationManager.AppSettings["images-folder"] + archivo.SafeFileName);
+
+                //La clase File, es estática y me permite usar una serie de métodos. Copy() recibe un source file -> archivo.FileName, y un destino: 
+                //podría ser c: Pero, no lo hago directo acá. Voy a c:, creo una carpeta que sea parte de tu app (convendría que esté en su árbol del archivo, esto es un ej).
+
+                //Voy a copiar la ruta pero por "Archivo de configuración: "App.config" aparece en la ventana der. Explorador de Soluciones en el archivo winform.app -> App-config"
+
+                //hacer doble click: tiene una configuración por defecto y l e agregaremos:
+                // <appSettings> Etiqueta XML permite configurar la app. Esta etiqueta la agrego.
+                // < add key = "images-folder" value = "C:\poke-app\"/> agrego una clave "nombre", valor:"ruta genérica (crear la carpeta)."
+                //< add key = "conexion-db" value = "....." />    
+                //</ appSettings >
+                //Hicimos lo anterior para NO poner la ruta en el código en sí, sino buscarla a través del método: ConfigurationManager.AppSettings["images-folder"] o sea
+                //leerla desde el archivod e configuración. ¿CÖMO? En el exp de soluciones, en winform-app -> Referencias -> Agregar referencias -> Ensambladores ->
+                //buscar config y aparecerá: SystemConfiguration. Seleccionarlo y poner Ok. Ir a las líneas del principio e importarlo como using.System.Configuration;
+                //ahora puedo tipiar el método: ConfigurationManager.AppSettings["images-folder"] .
+                // Agrego + nombre del archivo -> acá e puede inventar uno pero x ahora mantendremos el nombre orignal: archivo.SafeFileName.
             }
 
         }
